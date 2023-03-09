@@ -1,11 +1,23 @@
 package ru.yandex.practicum.catsgram.model;
 
+import lombok.Data;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Email;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Data
 public class User {
+    @NotBlank
+    @Email
     private String email;
+    @NotBlank
     private String nickname;
+    @NotNull
+    @PastOrPresent
     private LocalDate birthdate;
 
     @Override
@@ -19,38 +31,5 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(email);
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-                "\"email\":\"" + email
-                + "\",\"nickname\":\"" + nickname
-                + "\",\"birthdate\":\"" + birthdate
-                +"\"}";
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public LocalDate getBirthdate() {
-        return birthdate;
-    }
-
-    public void setBirthdate(LocalDate birthdate) {
-        this.birthdate = birthdate;
     }
 }

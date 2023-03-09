@@ -1,57 +1,33 @@
 package ru.yandex.practicum.catsgram.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.catsgram.model.User;
-import ru.yandex.practicum.catsgram.model.UserAlreadyExistException;
+import ru.yandex.practicum.catsgram.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private List<User> users = new ArrayList<>();
+    private final UserService userService;
 
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     @GetMapping
-    public List<User> getUsers() {
-        log.debug("Users total: {}", users.size());
-        return users;
+    public List<User> findAll() {
+        return userService.findAll();
     }
 
     @PostMapping
-    public User addNewUser(@RequestBody User user) {
-        try {
-            if (users.contains(user)) {
-                throw new UserAlreadyExistException("User is already exist");
-            }
-            if (user.getEmail() == null) {
-                throw new InvalidEmailException("Email is either not entered or in wrong format");
-            }
-            users.add(user);
-        } catch (UserAlreadyExistException | InvalidEmailException e) {
-            System.out.println(e.getMessage());
-        }
-        log.debug(String.valueOf(user));
-        return user;
+    public User create(@RequestBody User user) {
+        return userService.create(user);
     }
 
     @PutMapping
-    public User updateOrAddUser(@RequestBody User user) {
-        try {
-            if (user.getEmail() == null) {
-                throw new InvalidEmailException("Email is either not entered or in wrong format");
-            }
-            if (users.contains(user)) {
-                users.set(users.indexOf(user), user);
-            } else {
-                users.add(user);
-            }
-        } catch (InvalidEmailException e) {
-            System.out.println(e.getMessage());
-        }
-        log.debug(String.valueOf(user));
-        return user;
+    public User put(@RequestBody User user) {
+        return userService.put(user);
     }
 }
