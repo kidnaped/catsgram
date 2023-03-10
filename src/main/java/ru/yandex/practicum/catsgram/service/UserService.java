@@ -1,14 +1,12 @@
 package ru.yandex.practicum.catsgram.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.catsgram.exception.InvalidEmailException;
 import ru.yandex.practicum.catsgram.exception.UserAlreadyExistException;
 import ru.yandex.practicum.catsgram.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -18,11 +16,10 @@ public class UserService {
         return new ArrayList<>(users.values());
     }
 
-    public User findByEmail(String email) {
-        if (users.containsKey(email)) {
-            return users.get(email);
-        }
-        return null;
+    public Optional<User> findByEmail(String email) {
+        return users.values().stream()
+                .filter(u -> u.getEmail().equals(email))
+                .findFirst();
     }
 
     public User create(User user) {
@@ -30,7 +27,6 @@ public class UserService {
             if (users.containsKey(user.getEmail())) {
                 throw new UserAlreadyExistException("User is already exist");
             }
-            emailValidation(user);
             users.put(user.getEmail(), user);
         } catch (UserAlreadyExistException | InvalidEmailException e) {
             System.out.println(e.getMessage());
@@ -41,18 +37,11 @@ public class UserService {
 
     public User put(User user) {
         try {
-            emailValidation(user);
             users.put(user.getEmail(), user);
         } catch (InvalidEmailException e) {
             System.out.println(e.getMessage());
         }
 
         return user;
-    }
-
-    private void emailValidation(User user) throws InvalidEmailException {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new InvalidEmailException("Email is either not entered or in wrong format");
-        }
     }
 }

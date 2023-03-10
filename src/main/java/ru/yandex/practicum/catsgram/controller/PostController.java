@@ -6,6 +6,7 @@ import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class PostController {
@@ -19,6 +20,11 @@ public class PostController {
     @GetMapping("/posts")
     public List<Post> findAll() {
         return postService.findAll();
+    }
+
+    @GetMapping("/posts/{postId}")
+    public Optional<Post> findById(@PathVariable int postId) {
+        return postService.findById(postId);
     }
 
     @PostMapping(value = "/post")
