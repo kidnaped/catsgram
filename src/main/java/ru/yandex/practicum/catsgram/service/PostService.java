@@ -7,8 +7,11 @@ import ru.yandex.practicum.catsgram.exception.UserNotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.model.User;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -21,8 +24,17 @@ public class PostService {
         this.userService = userService;
     }
 
-    public List<Post> findAll() {
-        return posts;
+    public List<Post> findAll(String sort, int from, int size) {
+        return posts.stream()
+                .sorted((p0, p1) -> {
+                    int comparator = p0.getCreationDate().compareTo(p1.getCreationDate());
+                    if (sort.equals("desc")) {
+                        comparator = comparator * -1;
+                    }
+                    return comparator;})
+                .skip(from)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     public Post findById(int postId) {
@@ -45,6 +57,26 @@ public class PostService {
             e.printStackTrace();
         }
         return post;
+    }
+
+    public List<Post> searchPosts(String author, LocalDate date) {
+        return posts.stream()
+                .filter(post -> post.getAuthor().equals(author))
+                .filter(post -> LocalDate.ofInstant(post.getCreationDate(), ZoneId.of("GMT+3")).equals(date))
+                .collect(Collectors.toList());
+    }
+
+    public List<Post> findPostsByEmail(String sort, int size, String friendEmail) {
+        return posts.stream()
+                .filter(post -> post.getAuthor().equals(friendEmail))
+                .sorted((p0, p1) -> {
+                    int comparator = p0.getCreationDate().compareTo(p1.getCreationDate());
+                    if (sort.equals("desc")) {
+                        comparator = comparator * -1;
+                    }
+                    return comparator;})
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     private Integer generateId() {

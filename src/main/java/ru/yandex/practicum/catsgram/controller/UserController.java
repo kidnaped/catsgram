@@ -21,7 +21,7 @@ public class UserController {
         return userService.findAll();
     }
 
-    @GetMapping("/users/{userEmail}")
+    @GetMapping("/{userEmail}")
     public User findByEmail(@PathVariable String userEmail) {
         return userService.findByEmail(userEmail);
     }
