@@ -5,8 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Friends {
+public class FeedParams {
     private String sort;
-    private int size;
+    private Integer size;
     private List<String> friendsEmail;
 }

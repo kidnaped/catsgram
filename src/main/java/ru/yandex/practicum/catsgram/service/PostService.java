@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.catsgram.Constants.*;
+
 @Service
 public class PostService {
     private final List<Post> posts = new ArrayList<>();
@@ -24,62 +26,55 @@ public class PostService {
         this.userService = userService;
     }
 
-    public List<Post> findAll(String sort, int from, int size) {
-        return posts.stream()
-                .sorted((p0, p1) -> {
-                    int comparator = p0.getCreationDate().compareTo(p1.getCreationDate());
-                    if (sort.equals("desc")) {
-                        comparator = comparator * -1;
-                    }
-                    return comparator;})
-                .skip(from)
-                .limit(size)
-                .collect(Collectors.toList());
+    public Post create(Post post) {
+        User postAuthor = userService.findByEmail(post.getAuthor());
+        if (postAuthor == null) {
+            throw new UserNotFoundException(String.format("User %s not found", post.getAuthor()));
+        }
+        post.setId(generateId());
+        posts.add(post);
+        return post;
     }
 
-    public Post findById(int postId) {
+    public Post findById(Integer postId) {
         return posts.stream()
-                .filter(post -> post.getId() == postId)
+                .filter(post -> post.getId().equals(postId))
                 .findFirst()
                 .orElseThrow(() -> new PostNotFoundException(String.format("Post № # %d not found", postId)));
     }
 
-    public Post create(Post post) {
-        try {
-            User user = userService.findByEmail(post.getAuthor());
-            if (user == null) {
-                throw new UserNotFoundException(String.format("User %s not found", post.getAuthor()));
-            }
-            post.setId(generateId());
-            posts.add(post);
-        } catch (UserNotFoundException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-        return post;
-    }
-
-    public List<Post> searchPosts(String author, LocalDate date) {
+    public List<Post> findAll(String sort, Integer from, Integer size) {
         return posts.stream()
-                .filter(post -> post.getAuthor().equals(author))
-                .filter(post -> LocalDate.ofInstant(post.getCreationDate(), ZoneId.of("GMT+3")).equals(date))
+                .sorted((p0, p1) -> compare(p0, p1, sort))
+                .skip(from)
+                .limit(size)
                 .collect(Collectors.toList());
     }
 
     public List<Post> findPostsByEmail(String sort, int size, String friendEmail) {
         return posts.stream()
                 .filter(post -> post.getAuthor().equals(friendEmail))
-                .sorted((p0, p1) -> {
-                    int comparator = p0.getCreationDate().compareTo(p1.getCreationDate());
-                    if (sort.equals("desc")) {
-                        comparator = comparator * -1;
-                    }
-                    return comparator;})
+                .sorted((p0, p1) -> compare(p0, p1, sort))
                 .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    public List<Post> findByAuthorAndDate(String author, LocalDate date) {
+        return posts.stream()
+                .filter(post -> post.getAuthor().equals(author))
+                .filter(post -> LocalDate.ofInstant(post.getCreationDate(), ZoneId.of("GMT+3")).equals(date))
                 .collect(Collectors.toList());
     }
 
     private Integer generateId() {
         return ++globalId;
+    }
+
+    private int compare(Post p0, Post p1, String sort) {
+        int result = p0.getCreationDate().compareTo(p1.getCreationDate());
+        if (sort.equals(DESCENDING_ORDER)) {
+            result = -result;
+        }
+        return result;
     }
 }

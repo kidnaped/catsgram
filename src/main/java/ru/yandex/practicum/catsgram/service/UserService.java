@@ -10,9 +10,24 @@ import java.util.*;
 @Service
 public class UserService {
     private final Map<String, User> users = new HashMap<>();
-
     public List<User> findAll() {
         return new ArrayList<>(users.values());
+    }
+
+    public User create(User user) {
+        emailValidation(user.getEmail());
+        if (users.containsKey(user.getEmail())) {
+            throw new UserAlreadyExistException(String.format("User %s is already exist", user.getEmail()));
+        }
+        users.put(user.getEmail(), user);
+        return user;
+    }
+
+    public User update(User user) {
+        emailValidation(user.getEmail());
+        users.put(user.getEmail(), user);
+
+        return user;
     }
 
     public User findByEmail(String email) {
@@ -23,32 +38,7 @@ public class UserService {
         }
     }
 
-    public User create(User user) {
-        try {
-            emailValidation(user.getEmail());
-            if (users.containsKey(user.getEmail())) {
-                throw new UserAlreadyExistException("User is already exist");
-            }
-            users.put(user.getEmail(), user);
-        } catch (UserAlreadyExistException | InvalidEmailException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-        return user;
-    }
-
-    public User update(User user) {
-        try {
-            emailValidation(user.getEmail());
-            users.put(user.getEmail(), user);
-        } catch (InvalidEmailException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-        return user;
-    }
-
-    private void emailValidation(String email) throws InvalidEmailException {
+    private void emailValidation(String email) {
         if (email == null || email.isBlank()) {
             throw new InvalidEmailException("Email can not be empty");
         }

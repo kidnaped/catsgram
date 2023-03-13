@@ -1,14 +1,15 @@
 package ru.yandex.practicum.catsgram.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.catsgram.exception.IncorrectParameterException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static ru.yandex.practicum.catsgram.Constants.*;
 
 @RestController
 @RequestMapping("/posts")
@@ -21,18 +22,21 @@ public class PostController {
     }
 
     @GetMapping
-    public List<Post> findAll(@RequestParam(defaultValue = "desc") String sort,
-                              @RequestParam(defaultValue = "1") int page,
-                              @RequestParam(defaultValue = "10") int size) {
-        if (!sort.equals("asc") || !sort.equals("desc")) {
-            throw new IllegalArgumentException("Must use \"asc\" or \"desc\" values for \"sort\" parameter.");
+    public List<Post> findAll(@RequestParam(defaultValue = DESCENDING_ORDER, required = false) String sort,
+                              @RequestParam(defaultValue = "1", required = false) Integer page,
+                              @RequestParam(defaultValue = "10", required = false) Integer size) {
+        if (!SORTS.contains(sort)) {
+            throw new IncorrectParameterException("sort");
         }
-        if (page <= 0 || size <= 0) {
-            throw new IllegalArgumentException("Page or size must be positive.");
+        if (page <= 0) {
+            throw new IncorrectParameterException("page");
+        }
+        if (size <= 0) {
+            throw new IncorrectParameterException("size");
         }
 
-        int from = (page - 1) * size;
 
+        Integer from = (page - 1) * size;
         return postService.findAll(sort, from, size);
     }
 
@@ -42,9 +46,9 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public List<Post> searchPosts(@RequestParam String author,
+    public List<Post> findByAuthorAndDate(@RequestParam String author,
                                   @RequestParam LocalDate date) {
-        return postService.searchPosts(author, date);
+        return postService.findByAuthorAndDate(author, date);
     }
 
     @PostMapping

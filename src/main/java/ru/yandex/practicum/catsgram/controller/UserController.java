@@ -16,14 +16,10 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
     @GetMapping
     public List<User> findAll() {
         return userService.findAll();
-    }
-
-    @GetMapping("/{userEmail}")
-    public User findByEmail(@PathVariable String userEmail) {
-        return userService.findByEmail(userEmail);
     }
 
     @PostMapping
@@ -32,7 +28,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User put(@RequestBody User user) {
+    public User update(@RequestBody User user) {
         return userService.update(user);
+    }
+
+    @GetMapping("/{userEmail}")
+    public User getByEmail(@PathVariable String userEmail) {
+        return userService.findByEmail(userEmail);
     }
 }
